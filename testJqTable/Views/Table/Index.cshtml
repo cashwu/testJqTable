@@ -16,6 +16,16 @@
 <link href="~/Content/dataTables.bootstrap.css" rel="stylesheet"/>
 <link href="~/Content/jquery.loadmask.css" rel="stylesheet"/>
 
+<style>
+    td.details-control {
+        background: url('../../images/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+    tr.shown td.details-control {
+        background: url('../../images/details_close.png') no-repeat center center;
+    }
+</style>
+
 <h2>@ViewBag.Title</h2>
 
 <div>
@@ -73,37 +83,68 @@
     <script src="~/Scripts/jquery.dataTables.min.js"></script>
     <script src="~/Scripts/dataTables.bootstrap.js"></script>
     <script src="~/Scripts/jquery.loadmask.js"></script>
-    
-    <script type="text/javascript" language="javascript" >
 
-	   $(document).ready(function() {
+    <script type="text/javascript" language="javascript">
 
-            InitCommandText();
+        $(document).ready(function() {
 
-	       InitTable();
-	   });
+            //InitCommandText();
+
+            //InitTable();
+        });
 
 
-	   function InitCommandText() {
+        function InitCommandText() {
 
-	       $("textarea[id^='commandText_']:visible").each(function(i, elem) {
-	           CodeMirror.fromTextArea(elem, {
-			     mode: "text/x-mysql",
-			     indentWithTabs: true,
-			     smartIndent: true,
-			     lineNumbers: true,
-			     matchBrackets : true,
-			     autofocus: false,
+            $("textarea[id^='commandText_']:visible").each(function(i, elem) {
+                CodeMirror.fromTextArea(elem, {
+                    mode: "text/x-mysql",
+                    indentWithTabs: true,
+                    smartIndent: true,
+                    lineNumbers: true,
+                    matchBrackets: true,
+                    autofocus: false,
                     firstLineNumber: 1,
-                    readOnly : true
-		      });
-	       });
-	   }
+                    readOnly: true
+                });
+            });
+        }
 
         function InitTable() {
-            if ($("#table").length > 0) {
-		      $("#table").DataTable();
-	       }
+            var table = $("#table").DataTable();
+
+            $('#table tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    // Open this row
+                    row.child(format({ name : "name123", extn : "extn 456" })).show();
+                    tr.addClass('shown');
+                }
+            });
+        }
+
+        function format(d) {
+            // `d` is the original data object for the row
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+                '<tr>' +
+                '<td>Full name:</td>' +
+                '<td>' + d.name + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<td>Extension number:</td>' +
+                '<td>' + d.extn + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<td>Extra info:</td>' +
+                '<td>And any further details here (images etc)...</td>' +
+                '</tr>' +
+                '</table>';
         }
 
         function InitDetail() {
@@ -118,12 +159,12 @@
         }
 
         function PopupWindow(url, title, w, h) {
-            var left = (screen.width/2)-(w/2);
-            var top = (screen.height/2)-(h/2);
+            var left = (screen.width / 2) - (w / 2);
+            var top = (screen.height / 2) - (h / 2);
 
             console.log("left " + left + "  top " + top);
 
-            return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+            return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
         }
 
         function PopupCenterDual(url, title, w, h) {
@@ -217,8 +258,8 @@
 			     <td>
 			         <textarea id="@("commandText_" + i)">@item.CommandText</textarea>
 			     </td>
-			     <td>
-                        <button id="@("btn_" + i)" data-id="@(item.Id)" class="btnDetail">Detail</button>
+			     <td class="details-control">
+                        @*<button id="@("btn_" + i)" data-id="@(item.Id)" class="btnDetail">Detail</button>*@
 			     </td>
 			 </tr>
 		  }
