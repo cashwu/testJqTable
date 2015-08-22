@@ -13,7 +13,7 @@
 
 <link href="~/Content/codemirror.css" rel="stylesheet"/>
 <link href="~/Content/jquery.dataTables.min.css" rel="stylesheet" />
-<link href="~/Content/dataTables.bootstrap.css" rel="stylesheet"/>
+@*<link href="~/Content/dataTables.bootstrap.css" rel="stylesheet"/>*@
 <link href="~/Content/jquery.loadmask.css" rel="stylesheet"/>
 
 <style>
@@ -81,7 +81,7 @@
     <script src="~/Scripts/codemirror.js"></script>
     <script src="~/Scripts/sql.js"></script>
     <script src="~/Scripts/jquery.dataTables.min.js"></script>
-    <script src="~/Scripts/dataTables.bootstrap.js"></script>
+    @*<script src="~/Scripts/dataTables.bootstrap.js"></script>*@
     <script src="~/Scripts/jquery.loadmask.js"></script>
 
     <script type="text/javascript" language="javascript">
@@ -111,7 +111,21 @@
         }
 
         function InitTable() {
-            var table = $("#table").DataTable();
+
+            // setting column search
+            $('#table tfoot tr th').each( function () {
+                var title = $('#table tfoot tr th').eq( $(this).index() ).text();
+                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+            } );
+
+            var table = $("#table").DataTable({
+                 "columnDefs": [ {
+                    "searchable": false,
+                    "orderable": false,
+                    "targets": 0
+                } ],
+                "order": [[ 1, 'asc' ]]
+            });
 
             // auto index column
             table.on( 'order.dt search.dt', function () {
@@ -120,6 +134,15 @@
                 } );
             } ).draw();
 
+            // column search
+            table.columns().every( function () {
+                var that = this;
+
+                console.log(this);
+                $('input', this.footer()).on( 'keyup change', function () {
+                    that.search(this.value).draw();
+                } );
+            } );
 
             $('#table tbody').on('click', 'td.details-control', function() {
                 var tr = $(this).closest('tr');
@@ -214,15 +237,24 @@
 @helper GetCategoryAHtml()
 {
     <table id="table" class="table table-bordered display dataTable">
-	   <thead>
-		  <tr>
-			 <th>#</th>
-			 <th>Id</th>
-		      <th>Name</th>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Id</th>
+                <th>Name</th>
                 <th>CommandText</th>
-		  </tr>
-	   </thead>
-	   <tbody>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>#</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>CommandText</th>
+            </tr>
+        </tfoot>
+        <tbody>
 		  @for (int i = 0; i < Model.CategoryAList.Count; i++)
 		  {
 			 var item = Model.CategoryAList[i];
@@ -243,16 +275,28 @@
 @helper GetCategoryBHtml()
 {
     <table id="table" class="table table-bordered display dataTable">
-	   <thead>
-		  <tr>
-			 <th>#</th>
-			 <th>Id</th>
-			 <th>Name</th>
-		      <th>Tel</th>
-		      <th>CommandText</th>
-                <th>Detail</th>
-		  </tr>
-	   </thead>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Tel</th>
+                <th>CommandText</th>
+                <th>Detail 1</th>
+                <th>Detail 2</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>#</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Tel</th>
+                <th>CommandText</th>
+                <th>Detail 1</th>
+                <th>Detail 2</th>
+            </tr>
+        </tfoot>
 	   <tbody>
 		  @for (int i = 0; i < Model.CategoryBList.Count; i++)
 		  {
@@ -266,8 +310,9 @@
 			     <td>
 			         <textarea id="@("commandText_" + i)">@item.CommandText</textarea>
 			     </td>
-			     <td class="details-control">
-                        @*<button id="@("btn_" + i)" data-id="@(item.Id)" class="btnDetail">Detail</button>*@
+			     <td class="details-control"></td>
+			     <td>
+                        <button id="@("btn_" + i)" data-id="@(item.Id)" class="btnDetail">Detail</button>
 			     </td>
 			 </tr>
 		  }
