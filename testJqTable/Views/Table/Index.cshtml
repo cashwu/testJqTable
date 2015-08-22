@@ -4,34 +4,53 @@
 
 @{
     ViewBag.Title = "Table";
+
+    if (IsAjax)
+    {
+        Layout = null;
+    }
 }
 
 <link href="~/Content/codemirror.css" rel="stylesheet"/>
 <link href="~/Content/jquery.dataTables.min.css" rel="stylesheet" />
 <link href="~/Content/dataTables.bootstrap.css" rel="stylesheet"/>
+<link href="~/Content/jquery.loadmask.css" rel="stylesheet"/>
 
-<h2>ViewBag.Title</h2>
+<h2>@ViewBag.Title</h2>
 
 <div>
     <section id="loginForm">
-	   @using (Html.BeginForm("Index", "Table", FormMethod.Post, new {@class = "form-horizontal", role = "form"}))
-	   {
-		  @Html.AntiForgeryToken()
-		  @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+        @using (Ajax.BeginForm("Index", new { controller = "Table" },
+            new AjaxOptions
+            {
+                HttpMethod = "Post",
+                InsertionMode = InsertionMode.Replace,
+                UpdateTargetId = "container",
+                OnBegin = "OnBegin",
+                OnSuccess = "OnSuccess",
+                OnComplete = "OnComplete"
+            }, new
+            {
+                @class = "form-horizontal",
+                role = "form"
+            }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-		  <div class="form-group">
-			 @Html.LabelFor(m => m.TableCategory, new {@class = "col-md-2 control-label"})
-			 <div class="col-md-10">
-				@Html.DropDownListFor(a => a.TableCategory, Model.CategorySelectItemList, new {@class = "form-control"})
-			 </div>
-		  </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.TableCategory, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(a => a.TableCategory, Model.CategorySelectItemList, new { @class = "form-control" })
+                </div>
+            </div>
 
-		  <div class="form-group">
-			 <div class="col-md-offset-2 col-md-10">
-				<input type="submit" value="Submit" class="btn btn-default"/>
-			 </div>
-		  </div>
-	   }
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Submit" class="btn btn-default" />
+                </div>
+            </div>
+        }
     </section>
 
     <section id="TableSection">
@@ -48,10 +67,12 @@
 
 @section scripts
 {
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
     <script src="~/Scripts/codemirror.js"></script>
     <script src="~/Scripts/sql.js"></script>
     <script src="~/Scripts/jquery.dataTables.min.js"></script>
     <script src="~/Scripts/dataTables.bootstrap.js"></script>
+    <script src="~/Scripts/jquery.loadmask.js"></script>
     
     <script type="text/javascript" language="javascript" >
 
@@ -59,9 +80,7 @@
 
             InitCommandText();
 
-	       if ($("#table").length > 0) {
-		      $("#table").DataTable();
-	       }
+	       InitTable();
 	   });
 
 
@@ -80,6 +99,65 @@
 		      });
 	       });
 	   }
+
+        function InitTable() {
+            if ($("#table").length > 0) {
+		      $("#table").DataTable();
+	       }
+        }
+
+        function InitDetail() {
+            $(".btnDetail").click(function() {
+
+                var id = $(this).data("id");
+
+                var url = "@Url.Action("GetOtherTable", "Table")" + "/" + id;
+
+                PopupCenterDual(url, "OtherTable", 500, 300);
+            });
+        }
+
+        function PopupWindow(url, title, w, h) {
+            var left = (screen.width/2)-(w/2);
+            var top = (screen.height/2)-(h/2);
+
+            console.log("left " + left + "  top " + top);
+
+            return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+        }
+
+        function PopupCenterDual(url, title, w, h) {
+            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+            var top = ((height / 2) - (h / 2)) + dualScreenTop;
+            var newWindow = window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+            // Puts focus on the newWindow
+            if (window.focus) {
+                newWindow.focus();
+            }
+        }
+
+        function OnComplete() {
+        }
+
+        function OnSuccess() {
+            InitCommandText();
+
+            InitTable();
+
+            $("#container").unmask();
+
+            InitDetail();
+        }
+
+        function OnBegin() {
+            $("#container").mask("Loading...");
+        }
     </script>
 }
 
@@ -122,7 +200,8 @@
 			 <th>Id</th>
 			 <th>Name</th>
 		      <th>Tel</th>
-                <th>CommandText</th>
+		      <th>CommandText</th>
+                <th>Detail</th>
 		  </tr>
 	   </thead>
 	   <tbody>
@@ -135,9 +214,12 @@
 				<td>@item.Id</td>
 				<td>@item.Name</td>
 				<td>@item.Tel</td>
-				<td>
-					<textarea id="@("commandText_" + i)">@item.CommandText</textarea>
-				</td>
+			     <td>
+			         <textarea id="@("commandText_" + i)">@item.CommandText</textarea>
+			     </td>
+			     <td>
+                        <button id="@("btn_" + i)" data-id="@(item.Id)" class="btnDetail">Detail</button>
+			     </td>
 			 </tr>
 		  }
 	   </tbody>

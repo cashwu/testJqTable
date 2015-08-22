@@ -19,6 +19,7 @@ namespace testJqTable.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Index(TableViewModel model)
         {
             model.CategorySelectItemList = this.GetCatogorySelectItemList();
@@ -40,6 +41,12 @@ namespace testJqTable.Controllers
             return View(model);
         }
 
+        public ActionResult GetOtherTable(int id)
+        {
+            var model = this.GetCategoryAList()[id - 1];
+            return View(model);
+        }
+
         private List<CategoryA> GetCategoryAList()
         {
             var result = new List<CategoryA>();
@@ -50,7 +57,7 @@ namespace testJqTable.Controllers
                 {
                     Id = i,
                     Name = i + "_name",
-                    CommandText = "select * from Test where i = 1"
+                    CommandText = "select * from Test where i = " + i
                 });
             }
 
@@ -68,7 +75,7 @@ namespace testJqTable.Controllers
                     Id = i,
                     Name = i + "_name",
                     Tel = Guid.NewGuid().ToString(),
-                    CommandText = "select * from Test where i = 1"
+                    CommandText = "select * from Test where i = " + i
                 });
             }
 
