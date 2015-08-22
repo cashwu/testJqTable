@@ -1,0 +1,145 @@
+﻿@using testJqTable.Models
+
+@model TableViewModel
+
+@{
+    ViewBag.Title = "Table";
+}
+
+<link href="~/Content/codemirror.css" rel="stylesheet"/>
+<link href="~/Content/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="~/Content/dataTables.bootstrap.css" rel="stylesheet"/>
+
+<h2>ViewBag.Title</h2>
+
+<div>
+    <section id="loginForm">
+	   @using (Html.BeginForm("Index", "Table", FormMethod.Post, new {@class = "form-horizontal", role = "form"}))
+	   {
+		  @Html.AntiForgeryToken()
+		  @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+
+		  <div class="form-group">
+			 @Html.LabelFor(m => m.TableCategory, new {@class = "col-md-2 control-label"})
+			 <div class="col-md-10">
+				@Html.DropDownListFor(a => a.TableCategory, Model.CategorySelectItemList, new {@class = "form-control"})
+			 </div>
+		  </div>
+
+		  <div class="form-group">
+			 <div class="col-md-offset-2 col-md-10">
+				<input type="submit" value="Submit" class="btn btn-default"/>
+			 </div>
+		  </div>
+	   }
+    </section>
+
+    <section id="TableSection">
+	   @if (Model.CategoryAList != null && Model.CategoryAList.Count > 0 && Model.TableCategory == TableCategoryEnum.CagegoryA)
+	   {
+		  @GetCategoryAHtml()
+	   }
+	   else if (Model.CategoryBList != null && Model.CategoryBList.Count > 0 && Model.TableCategory == TableCategoryEnum.CategoryB)
+	   {
+		  @GetCategoryBHtml()
+	   }
+    </section>
+</div>
+
+@section scripts
+{
+    <script src="~/Scripts/codemirror.js"></script>
+    <script src="~/Scripts/sql.js"></script>
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/dataTables.bootstrap.js"></script>
+    
+    <script type="text/javascript" language="javascript" >
+
+	   $(document).ready(function() {
+
+            InitCommandText();
+
+	       if ($("#table").length > 0) {
+		      $("#table").DataTable();
+	       }
+	   });
+
+
+	   function InitCommandText() {
+
+	       $("textarea[id^='commandText_']:visible").each(function(i, elem) {
+	           CodeMirror.fromTextArea(elem, {
+			     mode: "text/x-mysql",
+			     indentWithTabs: true,
+			     smartIndent: true,
+			     lineNumbers: true,
+			     matchBrackets : true,
+			     autofocus: false,
+                    firstLineNumber: 1,
+                    readOnly : true
+		      });
+	       });
+	   }
+    </script>
+}
+
+
+@helper GetCategoryAHtml()
+{
+    <table id="table" class="table table-bordered display dataTable">
+	   <thead>
+		  <tr>
+			 <th>#</th>
+			 <th>Id</th>
+		      <th>Name</th>
+                <th>CommandText</th>
+		  </tr>
+	   </thead>
+	   <tbody>
+		  @for (int i = 0; i < Model.CategoryAList.Count; i++)
+		  {
+			 var item = Model.CategoryAList[i];
+
+			 <tr>
+				<td>@(i + 1)</td>
+				<td>@item.Id</td>
+				<td>@item.Name</td>
+				<td>
+				    <textarea id="@("commandText_" + i)" >@item.CommandText</textarea>
+				</td>
+			 </tr>
+		  }
+	   </tbody>
+    </table>
+}
+
+@helper GetCategoryBHtml()
+{
+    <table id="table" class="table table-bordered display dataTable">
+	   <thead>
+		  <tr>
+			 <th>#</th>
+			 <th>Id</th>
+			 <th>Name</th>
+		      <th>Tel</th>
+                <th>CommandText</th>
+		  </tr>
+	   </thead>
+	   <tbody>
+		  @for (int i = 0; i < Model.CategoryBList.Count; i++)
+		  {
+			 var item = Model.CategoryBList[i];
+
+			 <tr>
+				<td>@(i + 1)</td>
+				<td>@item.Id</td>
+				<td>@item.Name</td>
+				<td>@item.Tel</td>
+				<td>
+					<textarea id="@("commandText_" + i)">@item.CommandText</textarea>
+				</td>
+			 </tr>
+		  }
+	   </tbody>
+    </table>
+}
