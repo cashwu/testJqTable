@@ -48,7 +48,7 @@ namespace testJqTable.Controllers
         public ActionResult GetOtherTable(int id)
         {
             var model = this.GetCategoryAList()[id - 1];
-            return View(model);
+            return PartialView(model);
         }
 
         private List<CategoryA> GetCategoryAList()
