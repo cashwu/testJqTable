@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 
 namespace testJqTable.Models
@@ -12,12 +13,15 @@ namespace testJqTable.Models
         public List<CategoryA> CategoryAList { get; set; }
 
         public List<CategoryB> CategoryBList { get; set; }
+
+        public List<CategoryC> CategoryCList { get; set; }
     }
 
     public enum TableCategoryEnum
     {
         CagegoryA = 0,
-        CategoryB
+        CategoryB,
+        CategoryC
     }
 
     public class CategoryA
@@ -38,5 +42,22 @@ namespace testJqTable.Models
         public string Tel { get; set; }
 
         public string CommandText { get; set; }
+    }
+
+    public class CategoryC
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Tel { get; set; }
+
+        public string Address { get; set; }
+
+        public string Note { get; set; }
+
+        public int Age { get; set; }
+
+        public DateTime Birth { get; set; }
     }
 }

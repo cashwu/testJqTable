@@ -37,6 +37,10 @@ namespace testJqTable.Controllers
             {
                 model.CategoryBList = this.GetCategoryBList();
             }
+            else if (model.TableCategory == TableCategoryEnum.CategoryC)
+            {
+                model.CategoryCList = this.GetCategoryCList();
+            }
 
             return View(model);
         }
@@ -76,6 +80,28 @@ namespace testJqTable.Controllers
                     Name = i + "_name",
                     Tel = Guid.NewGuid().ToString(),
                     CommandText = "select * from Test where i = " + i
+                });
+            }
+
+            return result;
+        }
+
+        private List<CategoryC> GetCategoryCList()
+        {
+            var result = new List<CategoryC>();
+
+            var random = new Random();
+            for (int i = 1; i <= 100; i++)
+            {
+                result.Add(new CategoryC
+                {
+                    Id = i,
+                    Name = i + "_name",
+                    Tel = Guid.NewGuid().ToString(),
+                    Address = Guid.NewGuid().ToString(),
+                    Age = random.Next(10, 50),
+                    Birth = DateTime.Now,
+                    Note = "note -- " + Guid.NewGuid()
                 });
             }
 
